@@ -9,7 +9,8 @@ namespace RaceTo21
 		public List<Card> cards = new List<Card>();
 		public PlayerStatus status = PlayerStatus.active;
 		public int score;
-
+		public int chip = 100;
+		//Create a int field called chip to store chips for each player
 		public Player(string n)
 		{
 			name = n;
@@ -20,7 +21,7 @@ namespace RaceTo21
 		 */
 		public void Introduce(int playerNum)
 		{
-			Console.WriteLine("Hello, my name is " + name + " and I am player #" + playerNum);
+			Console.WriteLine("Hello, my name is " + name + " and I am player #" + playerNum +" and have "+ chip + " chips");
 		}
 	}
 }

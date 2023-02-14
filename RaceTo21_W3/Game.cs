@@ -5,13 +5,14 @@ namespace RaceTo21
 {
     public class Game
     {
-        int numberOfPlayers; // number of players in current game
-        List<Player> players = new List<Player>(); // list of objects containing player data
-        CardTable cardTable; // object in charge of displaying game information
-        Deck deck = new Deck(); // deck of cards
-        int currentPlayer = 0; // current player on list
-        public Task nextTask; // keeps track of game state
-        private bool cheating = false; // lets you cheat for testing purposes if true
+        int numberOfPlayers;
+        List<Player> players = new List<Player>();
+        CardTable cardTable;
+        Deck deck = new Deck();
+        int currentPlayer = 0;
+        public Task nextTask;
+        private bool cheating = false;
+        int pot = 0;
 
 
         public Game(CardTable c)
@@ -55,6 +56,23 @@ namespace RaceTo21
             else if (nextTask == Task.IntroducePlayers)
             {
                 cardTable.ShowPlayers(players);
+                nextTask = Task.Bet;
+            }
+            else if(nextTask == Task.Bet)
+            { 
+                // Players bet in this task one by one
+                for (var count = 1; count <= numberOfPlayers; count++)
+                {
+                    Player player = players[currentPlayer];
+                    int bet = cardTable.BetChips(player);
+                    player.chip -= bet;
+                    cardTable.ShowChips(player);
+                    currentPlayer++;
+                    pot += bet;// Calculate pot
+
+                }
+                Console.WriteLine("There are " + pot + " bets in pot this round.");
+                currentPlayer = 0;
                 nextTask = Task.PlayerTurn;
             }
             else if (nextTask == Task.PlayerTurn)
@@ -88,11 +106,33 @@ namespace RaceTo21
             }
             else if (nextTask == Task.CheckForEnd)
             {
-                if (CheckWinner() || !CheckActivePlayers())
+                if (CheckRoundWinner() || !CheckActivePlayers())
                 {
-                    Player winner = DoFinalScoring();
-                    cardTable.AnnounceWinner(winner);
-                    nextTask = Task.GameOver;
+                    currentPlayer = 0;
+                    Player roundWinner = DoFinalScoring();
+                    cardTable.AnnounceRoundWinner(roundWinner, pot);//Show the round winner
+                    pot = 0;//reset pot
+                    //Check if any player has won 80% of the total chips or if any player has no chips left(This is the new game end condition)
+                    if (!CheckGameOver())
+                    {
+                        //If the game is not over, the remaining chips of all players will be displayed and a new round will be started
+                        for (var count = 1; count <= numberOfPlayers; count++)
+                        {
+                            Player player = players[currentPlayer];
+                            cardTable.ShowChips(player);
+                            currentPlayer++;
+                        }
+                        currentPlayer = 0;
+                        Console.WriteLine("New Round");
+                        nextTask = Task.Bet;
+                    }
+                    else
+                    {
+                        //If the game is over, find out who is the winner
+                        Player winner = FindFinalWinnner();
+                        cardTable.AnnounceWinner(winner);
+                        nextTask = Task.GameOver;
+                    }
                 }
                 else
                 {
@@ -110,7 +150,11 @@ namespace RaceTo21
                 nextTask = Task.GameOver;
             }
         }
-
+        /*Calculate the total score of the player's hand
+         * Is called by DoNextTask function playerTurn task
+         * DoNextTask function provides the current player object
+         * Return the number of score 
+         */
         public int ScoreHand(Player player)
         {
             int score = 0;
@@ -147,7 +191,11 @@ namespace RaceTo21
             }
             return score;
         }
-
+        /*Check if there is a player with the active status in all players
+         * Is called by DoNextTask function CheckForEnd task
+         * No parameter passed
+         * Retuen a bool to let DoNextTask function know if have a player is active
+         */
         public bool CheckActivePlayers()
         {
             foreach (var player in players)
@@ -161,11 +209,12 @@ namespace RaceTo21
         }
 
 
-        /*This fuction will help the task of CheckForEnd to check corner case
-         * when anyone get 21, win immediately
-         * All bust but one , win immediately
+        /*This fuction will help the task of CheckForEnd to check corner case . When anyone get 21, win immediately. When all player bust but one , win immediately.
+         * Is called by DoNextTask function CheckForEnd task
+         * No parameter passed
+         * Retuen a bool to let DoNextTask function know if have a player is active
         */
-        public bool CheckWinner()
+        public bool CheckRoundWinner()
         {
             int bustcounter = 0;
             foreach (var player in players)
@@ -189,7 +238,51 @@ namespace RaceTo21
             }
             return false; 
         }
+        /*Check if the game is over
+        * Is called by DoNextTask function CheckForEnd task
+        * No parameter passed
+        * Retuen a bool to let DoNextTask function know whether the conditions for the end of the game are met
+        */
+        public bool CheckGameOver()
+        {
+            foreach(var player in players)
+            {
+                if(player.chip >= ((100 * numberOfPlayers) * 0.8) || player.chip == 0)
+                {
+                    player.status = PlayerStatus.winner;
+                    return true;
+                }
+                else
+                {
+                    player.status = PlayerStatus.active;
+                    player.cards = new List<Card>();
+                }
+            }
+            return false;
+        }
 
+        /*Find out who is the final winner
+        * Is called by DoNextTask function CheckForEnd task
+        * No parameter passed
+        * Retuen Player object who is the final winner
+        */
+        public Player FindFinalWinnner()
+        {
+            foreach (var player in players)
+            {
+                if(player.status == PlayerStatus.winner)
+                {
+                    return player;
+                }
+            }
+            return null;
+        }
+
+        /*Find out who is the winner of the current round based on the player state or score
+         *Is called by DoNextTask function CheckForEnd task
+         * No parameter passed
+         * Retuen Player object who is the round winner
+         */
         public Player DoFinalScoring()
         {
             int highScore = 0;

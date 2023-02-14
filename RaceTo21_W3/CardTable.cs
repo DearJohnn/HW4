@@ -60,6 +60,12 @@ namespace RaceTo21
             return response;
         }
 
+        /*
+         *Ask if the player wants a card
+         * Is called by Game object
+         * Game object provides the current player object
+         * Returns a bool to Game object to let it know player wants a card or not
+         */
         public bool OfferACard(Player player)
         {
             while (true)
@@ -80,7 +86,31 @@ namespace RaceTo21
                 }
             }
         }
+        /* Get the number of the player how much to bet in this round
+         * Is called by Game object
+         * Game object provides the current player object
+         * Return the number of chips that player wants to bet
+         */
+        public int BetChips(Player player)
+        {
+            Console.Write("How many chips does " + player.name + " want to bet this round? (1 - " + player.chip + ")");
+            int bet;
+            string response = null;
+            response = Console.ReadLine();
+            while (int.TryParse(response, out bet) == false || bet < 1 || bet > player.chip)
+            {
+                Console.WriteLine("Invalid number of chips.");
+                Console.Write("How many chips does " + player.name + " want to bet this round? (1 - " + player.chip + ")");
+                response = Console.ReadLine();
+            }
+            return bet;
+        }
 
+        /*Show all of the card in player's hand one by one and show player's total score
+         * Is called by Showhands function
+         * Showhands function provides the current player object
+         * No return type
+         */
         public void ShowHand(Player player)
         {
             if (player.cards.Count > 0)
@@ -107,6 +137,21 @@ namespace RaceTo21
             }
         }
 
+        /*Show how many chips in player's account
+         * Is called by Game object
+         * Game object provides the current player object
+         * No return type
+         */
+        public void ShowChips(Player player)
+        {
+            Console.WriteLine(player.name + " has " + player.chip + " left to bet.");
+        }
+
+        /*Traverses all players and shows their hands
+         * Is called by Game object
+         * Game object provides the player list
+         * No return type
+         */
         public void ShowHands(List<Player> players)
         {
             foreach (Player player in players)
@@ -115,19 +160,37 @@ namespace RaceTo21
             }
         }
 
-
-        public void AnnounceWinner(Player player)
+        /*Print out the round result
+         * Is called by Game object
+         * Game object provides the player object and round pot
+         * No return type
+         */
+        public void AnnounceRoundWinner(Player player, int pot)
         {
             if (player != null)
             {
-                Console.WriteLine(player.name + " wins!");
+                player.chip += pot;
+                Console.WriteLine(player.name + " wins " + pot + " chips!");
             }
             else
             {
                 Console.WriteLine("Everyone busted!");
             }
+        }
+        /*Print out the final winner
+         * Is called by Game object
+         * Game object provides the player object
+         * No return type
+         */
+        public void AnnounceWinner(Player player)
+        {
+            if (player != null)
+            {
+                Console.WriteLine(player.name + " is the final winner!");
+            }
             Console.Write("Press <Enter> to exit... ");
             while (Console.ReadKey().Key != ConsoleKey.Enter) { }
         }
+
     }
 }
