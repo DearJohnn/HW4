@@ -65,7 +65,7 @@ namespace RaceTo21
                 {
                     Player player = players[currentPlayer];
                     int bet = cardTable.BetChips(player);
-                    player.chip -= bet;
+                    player.setChip(player.chip - bet);
                     cardTable.ShowChips(player);
                     currentPlayer++;
                     pot += bet;// Calculate pot
@@ -85,20 +85,20 @@ namespace RaceTo21
                     {
                         Card card = deck.DealTopCard();
                         player.cards.Add(card);
-                        player.score = ScoreHand(player);
+                        player.setScore(ScoreHand(player));
                         if (player.score > 21)
                         {
-                            player.status = PlayerStatus.bust;
+                            player.setStatus(PlayerStatus.bust);
                         }
                         else if (player.score == 21)
                         {
-                            player.status = PlayerStatus.win;
+                            player.setStatus(PlayerStatus.win);
 
                         }
                     }
                     else
                     {
-                        player.status = PlayerStatus.stay;
+                        player.setStatus(PlayerStatus.stay);
                     }
                 }
                 cardTable.ShowHand(player);
@@ -249,12 +249,12 @@ namespace RaceTo21
             {
                 if(player.chip >= ((100 * numberOfPlayers) * 0.8) || player.chip == 0)
                 {
-                    player.status = PlayerStatus.winner;
+                    player.setStatus(PlayerStatus.winner);
                     return true;
                 }
                 else
                 {
-                    player.status = PlayerStatus.active;
+                    player.setStatus(PlayerStatus.active);
                     player.cards = new List<Card>();
                 }
             }

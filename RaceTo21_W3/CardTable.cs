@@ -169,7 +169,7 @@ namespace RaceTo21
         {
             if (player != null)
             {
-                player.chip += pot;
+                player.setChip(player.chip + pot);
                 Console.WriteLine(player.name + " wins " + pot + " chips!");
             }
             else

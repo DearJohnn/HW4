@@ -5,16 +5,40 @@ namespace RaceTo21
 {
 	public class Player
 	{
-		public string name;
-		public List<Card> cards = new List<Card>();
-		public PlayerStatus status = PlayerStatus.active;
-		public int score;
-		public int chip = 100;
-		//Create a int field called chip to store chips for each player
+		
+		public string name { get; set; }
+		public List<Card> cards { get; set; }
+		public PlayerStatus status { get; private set; }
+		public int score { get; private set; }
+		public int chip { get; private set; }//Create a int field called chip to store chips for each player, player can get this but can not set this by themselves
 		public Player(string n)
 		{
 			name = n;
+			cards = new List<Card>();
+			status = PlayerStatus.active;
+			chip = 100;
         }
+		/* Set player's score privately
+		 * Called by Game class
+		 */
+		public void setScore(int score)
+		{
+			this.score = score;
+		}
+		/* Set player's status privately
+		 * Called by Game class
+		 */
+		public void setStatus(PlayerStatus status)
+		{
+			this.status = status;
+		}
+		/* Set player's chips privately
+		* Called by Game class
+		*/
+		public void setChip(int chip)
+		{
+			this.chip = chip;
+		}
 
 		/* Introduces player by name
 		 * Called by CardTable object
