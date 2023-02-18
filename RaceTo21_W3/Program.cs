@@ -19,8 +19,8 @@ namespace RaceTo21
                     Design a chip account for each player. Players can bet each round, and the winner wins all the chips. 
                     The player's bet is kept for the next turn if no one wins this turn.
          *Level 2：
-                   The person with the most bets in the wager account after three rounds wins, and if a player loses all 
-                   bets within a period of 3 rounds, the game ends immediately. 
+                   If a player wins more than 80% of the total chips of all players, or if a player loses all 
+                   chips, the game ends immediately. 
          
          
          */
